@@ -1,0 +1,32 @@
+.logo {
+    background-image: url("img/logo.png");
+    background-size:cover; 
+    background-repeat: no-repeat;
+    background-position: center;
+    border-radius: 100%;
+    position: fixed;
+    top: 10px;
+    left: 10px;
+}
+
+.caixaCasas {
+    background-color: rgb(205, 205, 211);
+    color: black;
+    font-size: px;
+    width: 49%;
+    height: 96%;
+    margin: 1%;
+    text-align: center;
+    border-radius: 25px;
+}
+
+.barra-pesquisa{
+    background-color: rgb(46, 3, 3);
+    text-align: center;
+}
+
+.foto-casa{
+    margin-top: 25px;
+    width: 85%;
+    height: 48%;
+}

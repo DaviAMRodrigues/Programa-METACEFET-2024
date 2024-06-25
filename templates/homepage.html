@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='homepage.css') }}">
+    <link rel="shortcut icon" href="{{ url_for('static', filename='img/logo.png') }}">
+    <title>Home Teller</title>
+</head>
+<body style="margin: 0%;">
+    <header style=" background-color: rgb(211, 200, 189); width: 100%; height: 10vw; position: fixed; top: 0px; border-bottom: 1px solid rgb(205, 205, 211);">
+        <div class="logo" style="width: 5vw; height: 5vw;"></div>
+        <div style="text-align: center;">
+            <p style="color: rgb(46, 3, 3); font-size: 3vw; font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;">
+                Home Teller
+            </p>
+        </div>
+        <br>
+    </header>
+    <main style=" margin-top: 10vw; background-color: rgb(211, 200, 189);">
+        <div style="border-bottom: 1px solid rgb(205, 205, 211); margin-bottom: 10px; height: 30wh; width: 100%;">
+            <div class="barra-pesquisa">
+                <form action="/" method="post">
+                    <label for="user_input" style="font-size: 100%; color: white;">Apartment Location:</label><br>
+                    <textarea id="user_input" name="user_input" rows="1" cols="50" required="" style="width: 80%; height: 90%; resize: none;"></textarea><br>
+                    <input type="submit" value="Enviar" style="height: 5%;">
+                </form>
+            </div>
+        </div>
+        <div style="display: flex; width: 100%; height: 80vh;">
+            <div style="text-align: center; width: 50%; height: 100%;">
+                <iframe src="https://www.google.com/maps/d/embed?mid=1MIfhWVe9DwTZBLNUavuaiz-dsKq9vPU&ehbc=2E312F&noprof=1" width="98%" height="99%" style="overflow: hidden;"></iframe>
+            </div>
+            <div style="width: 50%; height: 100%;">
+                <div style="display: flex; height: 40vh;">
+                    <div class="caixaCasas" >
+                        <img src="{{linkcasa1}}" alt="imagem-casa" class="foto-casa">
+                        <p>Description: {{description}}</p>
+                        <p>Click for more</p>
+                    </div>
+                    <div class="caixaCasas" >
+                        <img src="{{linkcasa1}}" alt="imagem-casa" class="foto-casa">
+                        <p>Description: {{description}}</p>
+                        <p>Click for more</p>
+                    </div>
+                </div>
+                <div style="display: flex; height: 40vh;">
+                    <div class="caixaCasas" >
+                        <img src="{{linkcasa1}}" alt="imagem-casa" class="foto-casa">
+                        <p>Description: {{description}}</p>
+                        <p>Click for more</p>
+                    </div>
+                    <div class="caixaCasas" >
+                        <img src="{{linkcasa1}}" alt="imagem-casa" class="foto-casa">
+                        <p>Description: {{description}}</p>
+                        <p>Click for more</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    <footer style="background-color: rgb(2, 55, 1); color: white; width: 100%; height: 10vw; text-align: center;">
+        <br>
+        <br>
+        <p>&copy KaS 2024</p>
+        <p></p>
+    </footer>
+</body>
+</html>
