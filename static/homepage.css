@@ -1,32 +1,56 @@
-.logo {
-    background-image: url("img/logo.png");
-    background-size:cover; 
-    background-repeat: no-repeat;
-    background-position: center;
-    border-radius: 100%;
-    position: fixed;
-    top: 10px;
-    left: 10px;
-}
-
-.caixaCasas {
-    background-color: rgb(205, 205, 211);
-    color: black;
-    font-size: px;
-    width: 49%;
-    height: 96%;
-    margin: 1%;
-    text-align: center;
-    border-radius: 25px;
-}
-
 .barra-pesquisa{
     background-color: rgb(46, 3, 3);
     text-align: center;
 }
 
+p{
+    font-size: 3vw;
+}
+
+h1{
+    font-size: 3vw;
+}
+h2{
+    font-size: 3vw;
+}
+
+body, html {
+    margin: 0%;
+    padding: 0%;
+    height: 100%;
+    background: url('img/img2.jpg') no-repeat center center fixed; /* Substitua pelo caminho da sua imagem */
+    background-size: cover;
+}
+
+.menu{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    width: 100%;
+    background: rgba(255, 255, 255, 0.3);
+    backdrop-filter: blur(10px); 
+    -webkit-backdrop-filter: blur(10px);
+}
+
+button {
+    border: none; 
+    transition: background-color 0.3s ease; 
+    background-color: black;
+    color: white;
+}
+button:hover {
+    background-color: #333; 
+}
+
 .foto-casa{
+    border-radius: 5%;
     margin-top: 25px;
     width: 85%;
-    height: 48%;
+    height: 90%;
+}
+#search-section {
+    display: none;
+    margin-top: 50vh;
+    margin-bottom: 50vh;
 }

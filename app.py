@@ -1,6 +1,6 @@
 from langchain_google_genai import ChatGoogleGenerativeAI
-import os
-from dotenv import load_dotenv
+import sqlite3
+import pandas as pd
 from googleapiclient.discovery import build
 import requests
 from langchain_community.document_loaders.web_base import WebBaseLoader
@@ -10,13 +10,17 @@ from langchain_community.embeddings import GooglePalmEmbeddings
 from langchain_community.vectorstores.chroma import Chroma
 from langchain.retrievers.self_query.base import SelfQueryRetriever
 from langchain.chains.query_constructor.schema import AttributeInfo
-from langchain.prompts import PromptTemplate
-from langchain.chains import LLMChain
-from langchain.chains import SequentialChain
-
-'''
+from langchain.schema import Document
+from flask import Flask, request, render_template, redirect, url_for, flash
 from langchain.cache import SQLiteCache
 from langchain.globals import set_llm_cache
+import numpy as np
+from nltk import ngrams
+from nltk.metrics.distance import jaccard_distance
+from nltk.util import ngrams as nltk_ngrams
+
+app = Flask(__name__)
+app.secret_key = '001'
 
 set_llm_cache(SQLiteCache(database_path='arquivos/langchanin_cache_db.sqlite'))
 
@@ -138,6 +142,25 @@ def resumo(llm, criminal, restaurants, schools, supermarkets, traffic, parks, lo
     resposta = llm.predict(pergunta)
     return resposta
 
+def find_most_similar_index(df, user_description):
+    max_similarity = -1
+    most_similar_index = -1
+    user_ngrams = set(nltk_ngrams(user_description.split(), 2))  # N-grams of size 2 for the user description
+    
+    for index, row in df.iterrows():
+        description = row['description']
+        description_ngrams = set(nltk_ngrams(description.split(), 2))  # N-grams of size 2 for the dataframe description
+        
+        # Calculate Jaccard similarity
+        jaccard_sim = 1 - jaccard_distance(user_ngrams, description_ngrams)
+        
+        # Update max similarity and index if current description is more similar
+        if jaccard_sim > max_similarity:
+            max_similarity = jaccard_sim
+            most_similar_index = index
+    
+    return most_similar_index
+
 GOOGLE_API_KEY = 'AIzaSyCP52s5khB3lCjyowgnYESbNwWG6rMiHXA'
 SEARCH_API_KEY = 'AIzaSyAsKwnYKs4oCZ9dsz24rWGtk8QTkZ9ZCXI'
 
@@ -145,67 +168,168 @@ id = 'a3826ea98d9ca4435'
 
 llm = ChatGoogleGenerativeAI(model="gemini-pro", google_api_key=GOOGLE_API_KEY)
 
-@app.route('/')
-def homepage(name=None):
-    return render_template('homepage.html', person=name)
+conn = sqlite3.connect('arquivos/database_KasT.db')
+df = pd.read_sql('SELECT * FROM data', conn)
+conn.close()
 
-localizacao = '242 Bay Ridge Ave, Brooklyn, NY 11220, EUA'
+@app.route('/', methods=['GET', 'POST'])
+def homepage(name=None, df=df):
+    try:
+        num = len(df)
+        num = np.random.randint(1, num + 1)
+        linkcasa1 = f'/static/img/{num}/1.webp'
+        hou_price=df.hou_price[num-1]
+        area=df.area[num-1]
+        area_price=df.area_price[num-1]
+        bedrooms=df.bedrooms[num-1]
+        bathrooms=df.bathrooms[num-1]
+        description=df.description[num-1]
+        est_price=df.est_price[num-1]
+        address=df.rua[num-1]
+    except:
+        linkcasa1 = None
+        hou_price=None
+        area=None
+        area_price=None
+        bedrooms=None
+        bathrooms=None
+        description=None
+        est_price=None
+        address=None
 
+    if request.method == 'POST':
+        descricao = request.form.get('user_input')
+        num_descricao = find_most_similar_index(df = df, user_description = descricao)
+        try:
+            localizacao = df.rua[num_descricao]
+        except:
+            localizacao = None
+        return redirect(url_for('localizacao_exata', localizacao=localizacao))
+    return render_template('homepage.html', person=name, linkcasa1=linkcasa1, description=description, hou_price=hou_price, area=area, area_price=area_price, bedrooms=bedrooms, bathrooms=bathrooms, est_price=est_price, address= address)
 
-criminal = resposta(
-    query='Criminal rate ',
-    localizacao=localizacao,
-    SEARCH_API_KEY=SEARCH_API_KEY,
-    id=id,
-    llm=llm
-)
-restaurants = resposta(
-    query='Restaurants in ',
-    localizacao=localizacao,
-    SEARCH_API_KEY=SEARCH_API_KEY,
-    id=id,
-    llm=llm
-)
-schools = resposta(
-    query='Schools in ',
-    localizacao=localizacao,
-    SEARCH_API_KEY=SEARCH_API_KEY,
-    id=id,
-    llm=llm
-)
-supermarkets = resposta(
-    query='Supermarkets in ',
-    localizacao=localizacao,
-    SEARCH_API_KEY=SEARCH_API_KEY,
-    id=id,
-    llm=llm
-)
-traffic = resposta(
-    query='Car traffic in ',
-    localizacao=localizacao,
-    SEARCH_API_KEY=SEARCH_API_KEY,
-    id=id,
-    llm=llm
-)
+@app.route('/sell', methods=['GET', 'POST'])
+def sell(df=df, name=None):
+    if request.method == 'POST':
+        user_input_image = request.files['user_input_image']
+        user_input_address = request.form.get('user_input_address')
+        user_input_price = request.form.get('user_input_price')
+        user_input_area = request.form.get('user_input_area')
+        user_input_bedrooms = request.form.get('user_input_bedrooms')
+        user_input_bathrooms = request.form.get('user_input_bathrooms')
+        user_input_price_per_area = request.form.get('price_per_area')
 
-parks = resposta(
-    query='Parks in ',
-    localizacao=localizacao,
-    SEARCH_API_KEY=SEARCH_API_KEY,
-    id=id,
-    llm=llm
-)
+        if not (user_input_image and user_input_address and user_input_price and user_input_area and user_input_bedrooms and user_input_bathrooms):
+            flash('All fields must be filled out.')
+            return redirect(url_for('sell'))
 
-final_answer = resumo(
-    llm=llm,
-    criminal=criminal,
-    restaurants=restaurants,
-    schools=schools,
-    supermarkets=supermarkets,
-    traffic=traffic,
-    parks=parks,
-    localizacao = localizacao,
-)
+        image_path = f'static/img/{user_input_image.filename}'
+        user_input_image.save(image_path)
 
-print(final_answer)
-'''
+        criminal = resposta(
+            query='Criminal rate ',
+            localizacao=user_input_address,
+            SEARCH_API_KEY=SEARCH_API_KEY,
+            id=id,
+            llm=llm
+        )
+        restaurants = resposta(
+            query='Restaurants in ',
+            localizacao=user_input_address,
+            SEARCH_API_KEY=SEARCH_API_KEY,
+            id=id,
+            llm=llm
+        )
+        schools = resposta(
+            query='Schools in ',
+            localizacao=user_input_address,
+            SEARCH_API_KEY=SEARCH_API_KEY,
+            id=id,
+            llm=llm
+        )
+        supermarkets = resposta(
+            query='Supermarkets in ',
+            localizacao=user_input_address,
+            SEARCH_API_KEY=SEARCH_API_KEY,
+            id=id,
+            llm=llm
+        )
+        traffic = resposta(
+            query='Car traffic in ',
+            localizacao=user_input_address,
+            SEARCH_API_KEY=SEARCH_API_KEY,
+            id=id,
+            llm=llm
+        )
+
+        parks = resposta(
+            query='Parks in ',
+            localizacao=user_input_address,
+            SEARCH_API_KEY=SEARCH_API_KEY,
+            id=id,
+            llm=llm
+        )
+
+        final_answer = resumo(
+            llm=llm,
+            criminal=criminal,
+            restaurants=restaurants,
+            schools=schools,
+            supermarkets=supermarkets,
+            traffic=traffic,
+            parks=parks,
+            localizacao = user_input_address,
+        )
+
+        conn = sqlite3.connect('arquivos/database_KasT.db')
+        cursor = conn.cursor()
+        cursor.execute('''
+            INSERT INTO data (pasta, rua, hou_price, area, bedrooms, bathrooms, area_price, est_price, description)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ''', (image_path, user_input_address, user_input_price, user_input_area, user_input_bedrooms, user_input_bathrooms, user_input_price_per_area, 0, final_answer))
+        conn.commit()
+        conn.close()
+
+        flash('Information saved successfully.')
+        return redirect(url_for('sell'))
+
+    return render_template('sell.html')
+
+@app.route('/localizacao/<path:localizacao>')
+def localizacao_exata(localizacao, df=df, name=None):
+    for num, address in enumerate(df.rua):
+        if address == localizacao:
+            try:
+                linkcasa1 = f'/static/img/{num+1}/1.webp'
+                hou_price=df.hou_price[num]
+                area=df.area[num]
+                area_price=df.area_price[num]
+                bedrooms=df.bedrooms[num]
+                bathrooms=df.bathrooms[num]
+                description=df.description[num]
+                est_price=df.est_price[num]
+                address=df.rua[num]
+                break
+            except:
+                linkcasa1 = None
+                hou_price=None
+                area=None
+                area_price=None
+                bedrooms=None
+                bathrooms=None
+                description=None
+                est_price=None
+                address=None
+        else:
+            linkcasa1 = None
+            hou_price=None
+            area=None
+            area_price=None
+            bedrooms=None
+            bathrooms=None
+            description=None
+            est_price=None
+            address=None
+    return render_template('page.html', person=name, linkcasa1=linkcasa1, description=description, hou_price=hou_price, area=area, area_price=area_price, bedrooms=bedrooms, bathrooms=bathrooms, est_price=est_price, address=address)
+
+if __name__ == '__main__':
+    app.run(debug=True)

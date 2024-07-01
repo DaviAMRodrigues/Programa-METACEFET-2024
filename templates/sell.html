@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='sell.css') }}">
+    <title>Document</title>
+</head>
+<body style="margin: 0%;">
+    <header style="display: flex; background-color: black; color: white;">
+        <div style="width: 60%;">
+            <h1 style="font-size: 3vw; font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;">
+                KasT
+            </h1>
+        </div>
+        <div style="width: 10%;">
+            <a href="{{ url_for('sell') }}" style="color: white; text-decoration: none;">
+                <p style="font-size: 2vw; font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;">
+                    Sell
+                </p>
+            </a>
+        </div>
+        <div style="width: 10%;">
+            <a href="https://github.com/DaviAMRodrigues" style="color: white; text-decoration: none;">
+                <p style="font-size: 2vw; font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;">
+                    Contact
+                </p>
+            </a>
+        </div>
+        <div style="width: 10%;">
+            <a href="{{ url_for('homepage') }}" style="color: white; text-decoration: none;">
+                <p style="font-size: 2vw; font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;">
+                    Menu
+                </p>
+            </a>
+        </div>
+        <div style="width: 10%;">
+            <a href="{{ url_for('homepage') }}" style="color: white; text-decoration: none;">
+                <p style="font-size: 2vw; font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;">
+                    Account
+                </p>
+            </a>
+        </div>
+        <br>
+    </header>
+    <main style="background: rgba(255, 255, 255, 0.3);backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);">
+        <div style="display: flex; width: 100%;">
+            <form method="POST" id="mainForm" enctype="multipart/form-data" style="width: 100%;">
+                <div style="display: flex;">
+                    <div style="text-align: center; width: 50%; height: 80vh; margin-top: 3vh; margin-bottom: 3vh;">
+                        <div id="search-section" style="text-align: center;">
+                            <div style="text-align: center;">
+                                <input id="imagem-casa" type="file" name="user_input_image" placeholder="Enter address" style="font-size: 1vw; padding: 0.5vw;" required>
+                                <span id="image"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="text-align: center; width: 50%; margin-top: 3vh; margin-bottom: 3vh;">
+                        <h1 style="margin: 2%">Address:</h1>
+                        <div id="search-section" style="text-align: center;">
+                            <div style="text-align: center;">
+                                <input type="text" name="user_input_address" placeholder="Enter address" style="font-size: 1vw; padding: 0.5vw;" required>
+                            </div>
+                        </div>
+                        <h1 style="margin: 2%;">Price: </h1>
+                        <div id="search-section" style="text-align: center;">
+                            <div style="text-align: center;">
+                                <div class="dollar-input">
+                                    <span class="dollar-sign">$</span>
+                                    <input type="text" id="price-input" style="font-size: 1vw; padding: 0.5vw;" name="user_input_price" placeholder="Enter price (e.g., 0,00)" class="input-box" oninput="this.value = validateCurrencyInput(this) ? this.value : ''; calculatePricePerArea();" required>
+                                </div>
+                            </div>
+                        </div>
+                        <br><br>
+                        <div style="display: flex;">
+                            <div style="text-align: center; width: 50%;">
+                                <h2 style="margin: 2%;">Area:</h2>
+                                <div id="search-section" style="text-align: center;">
+                                    <div style="text-align: center;">
+                                        <div class="dollar-input">
+                                            <input type="text" id="area-input" style="font-size: 1vw; padding: 0.5vw;" name="user_input_area" placeholder="Enter area" class="input-box" oninput="this.value = validateCurrencyInput(this) ? this.value : ''; calculatePricePerArea();" required>
+                                            <span>m²</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <h2 style="margin: 2%;">Price per area:</h2>
+                                <h2 style="margin: 2%;" id="price-per-area"></h2>
+                            </div>
+                            <div style="text-align: center; width: 50%;">
+                                <h2 style="margin: 2%;">Bedrooms quantity:</h2>
+                                <div id="search-section" style=" text-align: center;">
+                                    <div style="text-align: center;">
+                                        <input type="text" name="user_input_bedrooms" placeholder="Enter bedrooms (e.g., 0)" style="font-size: 1vw; padding: 0.5vw;" oninput="this.value = validateIntegerInput(this) ? this.value : '';" required>
+                                    </div>
+                                </div>
+                                <h2 style="margin: 2%;">Bathrooms quantity:</h2>
+                                <div id="search-section" style=" text-align: center;">
+                                    <div style="text-align: center;">
+                                        <input type="text" name="user_input_bathrooms" placeholder="Enter bathrooms (e.g., 0)" style="font-size: 1vw; padding: 0.5vw;" oninput="this.value = validateIntegerInput(this) ? this.value : '';" required>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <br>
+                        <button type="submit" onclick="return validateForm();" style="font-size: 1.5vw; padding: 1vw;">Save</button>
+                        <br>
+                        <br>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <br>
+        <br>
+        <br>
+    </main>
+    <footer style="background-color: black; color: white; width: 100%; text-align: center;">
+        <br>
+        <p>&copy; KasT 2024</p>
+        <br>
+    </footer>
+
+    <script>
+        function validateCurrencyInput(input) {
+            var regex = /^\d+(\,\d{0,2})?$/; 
+            return regex.test(input.value);
+        }
+
+        function validateIntegerInput(input) {
+            var regex = /^\d*$/; 
+            return regex.test(input.value);
+        }
+
+        function calculatePricePerArea() {
+            const priceInput = document.getElementById('price-input').value;
+            const areaInput = document.getElementById('area-input').value;
+
+            const price = parseFloat(priceInput.replace(',', '.'));
+            const area = parseFloat(areaInput.replace(',', '.'));
+
+            if (!isNaN(price) && !isNaN(area) && area > 0) {
+                const pricePerArea = (price / area).toFixed(2);
+                document.getElementById('price-per-area').innerText = `$ ${pricePerArea}`;
+            } else {
+                document.getElementById('price-per-area').innerText = '';
+            }
+        }
+
+        function validateForm() {
+            const form = document.getElementById('mainForm');
+            const inputs = form.querySelectorAll('input[type="text"], input[type="file"]');
+            const pricePerArea = document.getElementById('price-per-area').innerText;
+
+            for (let input of inputs) {
+                if (input.value.trim() === '') {
+                    alert('All fields must be filled out.');
+                    return false;
+                }
+            }
+
+            const pricePerAreaInput = document.createElement('input');
+            pricePerAreaInput.type = 'hidden';
+            pricePerAreaInput.name = 'price_per_area';
+            pricePerAreaInput.value = pricePerArea.replace('$ ', '');
+            form.appendChild(pricePerAreaInput);
+
+            return true;
+
+            
+        }
+        document.addEventListener("DOMContentLoaded", function() {
+            var inputField = document.getElementById("user_input");
+            inputField.addEventListener("keypress", function(event) {
+                if (event.key === "Enter") {
+                    event.preventDefault();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
