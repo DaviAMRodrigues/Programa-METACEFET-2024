@@ -179,7 +179,20 @@ def homepage(name=None, df=df):
     try:
         num = len(df)
         num = np.random.randint(1, num + 1)
-        linkcasa1 = f'/static/img/{num}/1.webp'
+        image_dir = f'/static/img/{num}/'
+
+        image_files = os.listdir(image_dir)
+
+        image_extensions = ['.jpg', '.jpeg', '.png', '.gif', '.bmp']
+        image_files = [file for file in image_files if any(file.endswith(ext) for ext in image_extensions)]
+
+
+        if image_files:
+            first_image = image_files[0]
+            linkcasa1 = f'{image_dir}{first_image}'
+        else:
+            linkcasa1 = None 
+        
         hou_price=df.hou_price[num-1]
         area=df.area[num-1]
         area_price=df.area_price[num-1]
@@ -224,7 +237,9 @@ def sell(df=df, name=None):
             flash('All fields must be filled out.')
             return redirect(url_for('sell'))
 
-        image_path = f'static/img/{user_input_image.filename}'
+
+        num = len(df)+1
+        image_path = f'static/img/{num}{user_input_image.filename}'
         user_input_image.save(image_path)
 
         criminal = resposta(
