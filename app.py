@@ -15,6 +15,7 @@ from flask import Flask, request, render_template, redirect, url_for, flash
 from langchain.cache import SQLiteCache
 from langchain.globals import set_llm_cache
 import numpy as np
+import os
 from nltk import ngrams
 from nltk.metrics.distance import jaccard_distance
 from nltk.util import ngrams as nltk_ngrams
@@ -332,4 +333,5 @@ def localizacao_exata(localizacao, df=df, name=None):
     return render_template('page.html', person=name, linkcasa1=linkcasa1, description=description, hou_price=hou_price, area=area, area_price=area_price, bedrooms=bedrooms, bathrooms=bathrooms, est_price=est_price, address=address)
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port)
