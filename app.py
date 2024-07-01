@@ -141,6 +141,7 @@ def resposta(query, localizacao, SEARCH_API_KEY, id, llm):
 def resumo(llm, criminal, restaurants, schools, supermarkets, traffic, parks, localizacao):
     pergunta = f'Make a summary in English with the information: Criminal rate {criminal} in {localizacao}, Restaurants {restaurants} in {localizacao}, Schools {schools} in {localizacao}, Supermarkets {supermarkets} in {localizacao}, Car Traffic {traffic} in {localizacao}, Parks {parks} in {localizacao}'
     resposta = llm.predict(pergunta)
+    print(resposta)
     return resposta
 
 def find_most_similar_index(df, user_description):
@@ -290,8 +291,8 @@ def sell(df=df, name=None):
         conn.commit()
         conn.close()
 
+        print('informations saved')
         flash('Information saved successfully.')
-        return redirect(url_for('sell'))
 
     return render_template('sell.html')
 
