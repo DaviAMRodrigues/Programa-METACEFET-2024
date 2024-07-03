@@ -130,7 +130,7 @@ def resposta(query, localizacao, SEARCH_API_KEY, id, llm):
         pergunta = ' '.join(str_list)
         docs = retriever.get_relevant_documents(pergunta)
         for doc in docs:
-            text = llm.predict(f'Answer the question: {query_certa}. Based on the text: {doc.page_content} or in {doc.metadata["description"]}')
+            text = llm.predict(f'Answer the question: {query_certa}. Based on the text: {doc.page_content}')
             print(text)
             return text
     return 'No relevant documents found.'
@@ -332,7 +332,7 @@ def localizacao_exata(localizacao, df=df, name=None):
     for num, address in enumerate(df.rua):
         if address == localizacao:
             try:
-                linkcasa1 = f'/static/img/{num+1}/1.webp'
+                linkcasa1 = f'/static/img/{num+1}/1.png'
                 hou_price=df.hou_price[num]
                 area=df.area[num]
                 area_price=df.area_price[num]
