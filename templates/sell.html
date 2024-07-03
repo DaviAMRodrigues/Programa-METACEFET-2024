@@ -175,6 +175,23 @@
                 }
             });
         });
+        document.getElementById('imagem-casa').addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const imgElement = document.createElement('img');
+                    imgElement.src = e.target.result;
+                    imgElement.style.maxWidth = '100%';
+                    imgElement.style.height = 'auto';
+                    
+                    const imageSpan = document.getElementById('image');
+                    imageSpan.innerHTML = ''; // Clear any existing content
+                    imageSpan.appendChild(imgElement);
+                }
+                reader.readAsDataURL(file);
+            }
+        });
     </script>
 </body>
 </html>

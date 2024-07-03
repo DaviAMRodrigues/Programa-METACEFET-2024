@@ -12,8 +12,6 @@ from langchain.retrievers.self_query.base import SelfQueryRetriever
 from langchain.chains.query_constructor.schema import AttributeInfo
 from langchain.schema import Document
 from flask import Flask, request, render_template, redirect, url_for, flash
-from langchain.cache import SQLiteCache
-from langchain.globals import set_llm_cache
 import numpy as np
 import os
 from nltk import ngrams
@@ -23,7 +21,6 @@ from nltk.util import ngrams as nltk_ngrams
 app = Flask(__name__)
 app.secret_key = '001'
 
-set_llm_cache(SQLiteCache(database_path='arquivos/langchanin_cache_db.sqlite'))
 
 def google_search(query, api_key, cse_id):
     url = "https://www.googleapis.com/customsearch/v1"
@@ -138,8 +135,8 @@ def resposta(query, localizacao, SEARCH_API_KEY, id, llm):
             return text
     return 'No relevant documents found.'
 
-def resumo(llm, criminal, restaurants, schools, supermarkets, traffic, parks, localizacao):
-    pergunta = f'Make a summary in English with the information: Criminal rate {criminal} in {localizacao}, Restaurants {restaurants} in {localizacao}, Schools {schools} in {localizacao}, Supermarkets {supermarkets} in {localizacao}, Car Traffic {traffic} in {localizacao}, Parks {parks} in {localizacao}'
+def resumo(llm, criminal, restaurants, schools, supermarkets, traffic, parks, localizacao, price, area, bedrooms_quantity, bathrooms_quantity):
+    pergunta = f'Make a summary in English with the information: Localization: {localizacao}, Price{price}, Area{area}, Bedrooms quantity {bedrooms_quantity}, Bathrooms quantity {bathrooms_quantity}, Criminal rate {criminal} in {localizacao}, Restaurants {restaurants} in {localizacao}, Schools {schools} in {localizacao}, Supermarkets {supermarkets} in {localizacao}, Car Traffic {traffic} in {localizacao}, Parks {parks} in {localizacao}'
     resposta = llm.predict(pergunta)
     print(resposta)
     return resposta
@@ -178,29 +175,44 @@ conn.close()
 def homepage(name=None, df=df):
     try:
         num = len(df)
-        num = np.random.randint(1, num + 1)
-        image_dir = f'/static/img/{num}/'
+        random_num = np.random.randint(1, num)
 
-        image_files = os.listdir(image_dir)
+        image_dir = f'./static/img/{random_num}/'
 
-        image_extensions = ['.jpg', '.jpeg', '.png', '.gif', '.bmp']
+        if os.path.exists(image_dir):
+            print("Directory exists.")
+            try:
+                image_files = os.listdir(image_dir)
+                print(f"Files in directory: {image_files}")
+            except PermissionError:
+                print(f"Permission denied for directory: {image_dir}")
+                image_files = []
+            except Exception as e:
+                print(f"An error occurred: {e}")
+                image_files = []
+        else:
+            print(f"Directory not found: {image_dir}")
+            image_files = []
+
+        image_extensions = ['.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp']
+
         image_files = [file for file in image_files if any(file.endswith(ext) for ext in image_extensions)]
-
 
         if image_files:
             first_image = image_files[0]
             linkcasa1 = f'{image_dir}{first_image}'
+
         else:
-            linkcasa1 = None 
+            linkcasa1 = None
         
-        hou_price=df.hou_price[num-1]
-        area=df.area[num-1]
-        area_price=df.area_price[num-1]
-        bedrooms=df.bedrooms[num-1]
-        bathrooms=df.bathrooms[num-1]
-        description=df.description[num-1]
-        est_price=df.est_price[num-1]
-        address=df.rua[num-1]
+        hou_price=df.hou_price[random_num-1]
+        area=df.area[random_num-1]
+        area_price=df.area_price[random_num-1]
+        bedrooms=df.bedrooms[random_num-1]
+        bathrooms=df.bathrooms[random_num-1]
+        description=df.description[random_num-1]
+        est_price=df.est_price[random_num-1]
+        address=df.rua[random_num-1]
     except:
         linkcasa1 = None
         hou_price=None
@@ -295,6 +307,10 @@ def sell(df=df, name=None):
             traffic=traffic,
             parks=parks,
             localizacao = user_input_address,
+            price=user_input_price,
+            area=user_input_area,
+            bedrooms_quantity=user_input_bedrooms,
+            bathrooms_quantity=user_input_bathrooms,
         )
 
         conn = sqlite3.connect('arquivos/database_KasT.db')
