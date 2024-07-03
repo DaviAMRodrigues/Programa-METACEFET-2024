@@ -48,13 +48,7 @@ def link_site(language, search_api_key, search_engine_id, query, llm):
                     response = requests.get(link, timeout=10)
                     if response.headers.get('content-type', '').startswith('application/pdf'):
                         print(f"Found PDF: {link}")
-                        try:
-                            loader = PyPDFDirectoryLoader(link)
-                            documentos = loader.load()
-                            return link, documentos
-                        except:
-                            print('Erro ao abrir o pdf')
-                            return None, None
+                        continue
                     elif response.status_code == 200:
                         loader = WebBaseLoader(link)
                         documentos = loader.load()
@@ -144,16 +138,16 @@ def resumo(llm, criminal, restaurants, schools, supermarkets, traffic, parks, lo
 def find_most_similar_index(df, user_description):
     max_similarity = -1
     most_similar_index = -1
-    user_ngrams = set(nltk_ngrams(user_description.split(), 2))  # N-grams of size 2 for the user description
+    user_ngrams = set(nltk_ngrams(user_description.split(), 2))  
     
     for index, row in df.iterrows():
         description = row['description']
-        description_ngrams = set(nltk_ngrams(description.split(), 2))  # N-grams of size 2 for the dataframe description
+        description_ngrams = set(nltk_ngrams(description.split(), 2))  
         
-        # Calculate Jaccard similarity
+       
         jaccard_sim = 1 - jaccard_distance(user_ngrams, description_ngrams)
         
-        # Update max similarity and index if current description is more similar
+        
         if jaccard_sim > max_similarity:
             max_similarity = jaccard_sim
             most_similar_index = index
