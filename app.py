@@ -1,5 +1,4 @@
 from langchain_google_genai import ChatGoogleGenerativeAI
-import sqlite3
 import pandas as pd
 from googleapiclient.discovery import build
 import requests
@@ -17,10 +16,14 @@ import os
 from nltk import ngrams
 from nltk.metrics.distance import jaccard_distance
 from nltk.util import ngrams as nltk_ngrams
+from supabase import create_client, Client
+
+url = 'https://qbnpppizztfscaswmhbe.supabase.co'
+key = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFibnBwcGl6enRmc2Nhc3dtaGJlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjAyMTU5MzIsImV4cCI6MjAzNTc5MTkzMn0.oTgoozE1RpBLHvVqYj4E5mo_kQv0po0PVfGPFN8D_Aw"
+supabase: Client = create_client(url, key)
 
 app = Flask(__name__)
 app.secret_key = '001'
-
 
 def google_search(query, api_key, cse_id):
     url = "https://www.googleapis.com/customsearch/v1"
@@ -161,16 +164,15 @@ id = 'a3826ea98d9ca4435'
 
 llm = ChatGoogleGenerativeAI(model="gemini-pro", google_api_key=GOOGLE_API_KEY)
 
-conn = sqlite3.connect('arquivos/database_KasT.db')
-df = pd.read_sql('SELECT * FROM data', conn)
-conn.close()
+response = supabase.table('data').select('*').execute()
+data = response.data
+df = pd.DataFrame(data)
 
 @app.route('/', methods=['GET', 'POST'])
 def homepage(name=None, df=df):
+    num = len(df)
+    random_num = np.random.randint(0, num)
     try:
-        num = len(df)
-        random_num = np.random.randint(1, num)
-
         image_dir = f'./static/img/{random_num}/'
 
         if os.path.exists(image_dir):
@@ -199,14 +201,14 @@ def homepage(name=None, df=df):
         else:
             linkcasa1 = None
         
-        hou_price=df.hou_price[random_num-1]
-        area=df.area[random_num-1]
-        area_price=df.area_price[random_num-1]
-        bedrooms=df.bedrooms[random_num-1]
-        bathrooms=df.bathrooms[random_num-1]
-        description=df.description[random_num-1]
-        est_price=df.est_price[random_num-1]
-        address=df.rua[random_num-1]
+        hou_price=df.hou_price[random_num]
+        area=df.area[random_num]
+        area_price=df.area_price[random_num]
+        bedrooms=df.bedroom[random_num]
+        bathrooms=df.bathroom[random_num]
+        description=df.description[random_num]
+        est_price=df.est_price[random_num]
+        address=df.rua[random_num]
     except:
         linkcasa1 = None
         hou_price=None
@@ -306,15 +308,8 @@ def sell(df=df, name=None):
             bedrooms_quantity=user_input_bedrooms,
             bathrooms_quantity=user_input_bathrooms,
         )
-
-        conn = sqlite3.connect('arquivos/database_KasT.db')
-        cursor = conn.cursor()
-        cursor.execute('''
-            INSERT INTO data (pasta, rua, hou_price, area, bedrooms, bathrooms, area_price, est_price, description)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-        ''', (image_path, user_input_address, user_input_price, user_input_area, user_input_bedrooms, user_input_bathrooms, user_input_price_per_area, 0, final_answer))
-        conn.commit()
-        conn.close()
+        
+        supabase.table('data').insert({'id':len(df), 'rua': user_input_address, 'hou_price': user_input_price, 'area': user_input_area, 'area_price': user_input_price_per_area, 'bedroom': user_input_bedrooms, 'bathroom': user_input_bathrooms, 'description': final_answer, 'est_price': 0, 'past': image_path }).execute()
 
         print('informations saved')
         flash('Information saved successfully.')
@@ -326,15 +321,35 @@ def localizacao_exata(localizacao, df=df, name=None):
     for num, address in enumerate(df.rua):
         if address == localizacao:
             try:
-                linkcasa1 = f'/static/img/{num+1}/1.png'
+                image_dir = f'./static/img/{num}/'
+
+                if os.path.exists(image_dir):
+                    print("Directory exists.")
+                    try:
+                        image_files = os.listdir(image_dir)
+                        print(f"Files in directory: {image_files}")
+                    except PermissionError:
+                        print(f"Permission denied for directory: {image_dir}")
+                        image_files = []
+                    except Exception as e:
+                        print(f"An error occurred: {e}")
+                        image_files = []
+                else:
+                    print(f"Directory not found: {image_dir}")
+                    image_files = []
+
+                
+                first_image = image_files[0]
+                linkcasa1 = f'{image_dir}{first_image}'
+                print(linkcasa1)
+
                 hou_price=df.hou_price[num]
                 area=df.area[num]
                 area_price=df.area_price[num]
-                bedrooms=df.bedrooms[num]
-                bathrooms=df.bathrooms[num]
+                bedrooms=df.bedroom[num]
+                bathrooms=df.bathroom[num]
                 description=df.description[num]
                 est_price=df.est_price[num]
-                address=df.rua[num]
                 break
             except:
                 linkcasa1 = None
