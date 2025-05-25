@@ -6,6 +6,23 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='pagestyles.css') }}">
     <link rel="shortcut icon" href="{{ url_for('static', filename='img/logo.png') }}">
     <title>Your Home</title>
+    <script>
+        window.onload = function() {
+            const imagem = document.getElementById("fotoCasa");
+            const linkcasa1 = "{{linkcasa1}}"; 
+            const imagemAlternativa = "{{ url_for('static', filename='img/Casa X.jpg') }}"; 
+
+            imagem.onerror = function() {
+                imagem.src = imagemAlternativa;
+            };
+    
+            if (linkcasa1) {
+                imagem.src = linkcasa1;
+            } else {
+                imagem.src = imagemAlternativa;
+            }
+        };
+    </script>    
 </head>
 <body style="margin: 0%;">
     <header style="display: flex; background-color: white;">
@@ -47,7 +64,7 @@
     <main style="background: rgba(255, 255, 255, 0.3);backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);">
         <div style="display: flex; width: 100%;">
             <div style="text-align: center; width: 50%; height: 80vh; margin-top: 3vh; margin-bottom: 3vh;">
-                <img src="{{linkcasa1}}" alt="erro" style=" height: 100%; width: 100%;">
+                <img id="fotoCasa" src="{{linkcasa1}}" alt="erro" style=" height: 100%; width: 100%;">
             </div>
             <div style="text-align: center; width: 50%; margin-top: 3vh; margin-bottom: 3vh;">
                 <h1 style="margin: 2%;">Address: {{address}}</h1>

@@ -37,6 +37,21 @@
                 searchSection.style.display = 'none';
             }
         });
+        window.onload = function() {
+        const imagem = document.getElementById("fotoCasa");
+        const linkcasa1 = "{{linkcasa1}}"; 
+        const imagemAlternativa = "{{ url_for('static', filename='img/Casa X.jpg') }}"; 
+
+        imagem.onerror = function() {
+            imagem.src = imagemAlternativa;
+        };
+
+        if (linkcasa1) {
+            imagem.src = linkcasa1;
+        } else {
+            imagem.src = imagemAlternativa;
+        }
+    };
     </script>
 </head>
 <body style="margin: 0%;">
@@ -86,7 +101,7 @@
         </div>
         <div style="display: flex; width: 100%; background-color: white;">
             <div style="text-align: center; width: 50%; height: 100%;">
-                <img src="{{linkcasa1}}" alt="imagem-casa" class="foto-casa">
+                <img id="fotoCasa" src="{{linkcasa1}}" alt="imagem-casa" class="foto-casa">
             </div>
             <div style="text-align: center; width: 50%;">
                 <h1 style="margin: 2%;">Address: {{address}}</h1>
